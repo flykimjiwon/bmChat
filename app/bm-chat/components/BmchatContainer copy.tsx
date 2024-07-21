@@ -1,152 +1,157 @@
 'use client'
 import { createBmchat, deleteBmchat, getBmchat, getBmchatSearch, updateBmchat } from "@/apis/bm_chat";
-import React,{useEffect,useState} from 'react'
+import React, { useEffect, useState, useRef } from 'react';
 import axios from "axios";
-// import useBMchatController from '../hooks/useBmchatController'
-
+import Loading from "../loading";
 
 const BmchatContainer = () => {
-
   const [messages, setMessages] = useState([
     { sender: '부물AI', text: '부동산과 관련된 질문을 물어봐 주세요' },
   ]);
   const [inputValue, setInputValue] = useState('');
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
-  const handleSendMessage = (e:any) => {
+  // const handleSendMessage = (e:any) => {
+  //   e.preventDefault();
+  //   if (inputValue.trim()) {
+  //     setMessages([...messages, { sender: '질문자', text: inputValue }]);
+  //     setInputValue('');
+  //     let answer = "";
+  //     axios.post('/api/generate', {
+  //       prompt: inputValue
+  //     })
+  //     .then((res) => {
+  //       console.log(res, '========모델컬요청테스트성공=======');
+  //       console.log(res.data.choices[0].message.content);
+  //       answer = res.data.choices[0].message.content;
+  //       setMessages((prevMessages) => [
+  //         ...prevMessages,
+  //         { sender: '부물AI', text: answer },
+  //       ]);
+  //       // Supabase 대화저장
+  //       createBmchat(inputValue,answer);
+  //     }).catch((err) => {
+  //       console.log(err, "요청실패");
+  //       setMessages((prevMessages) => [
+  //         ...prevMessages,
+  //         { sender: '부물AI', text: "질문 요청에 실패 했습니다." },
+  //       ]);
+  //     });
+  //   }
+  // };
+
+  const handleSendMessage = async (e:any) => {
     e.preventDefault();
-    if (inputValue.trim()) { //인풋값이 있는경우 동작함
-      setMessages([...messages, { sender: '질문자', text: inputValue }]);
+    if (inputValue.trim()) {
+      // 사용자의 메시지를 추가
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { sender: '질문자', text: inputValue },
+      ]);
+      
+      // "부물 AI가 답변을 준비중입니다..." 메시지 추가
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { sender: '부물AI', text: "AI가 답변을 준비중입니다..." },
+      ]);
+  
+      // 입력 필드 비우기
       setInputValue('');
-      let answer = ""
-      // Simulate AI response
-      console.log(">>>>inputValue",inputValue)
-      axios.post('/api/generate',{
-        // question: text,
-        // content: text
-        prompt: inputValue
-        // "n": 1,
-        // "temperature": 0.5,
-        // "top_p": 0.98,
-        // "frequency_penalty": 0.5
-        })
-      .then((res:any)=>{
-        console.log(res,'========모델컬요청테스트성공=======')
+  
+      try {
+        const res = await axios.post('/api/generate', {
+          prompt: inputValue
+        });
+        console.log(res, '========모델컬요청테스트성공=======');
         console.log(res.data.choices[0].message.content);
-        answer = res.data.choices[0].message.content;
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          { sender: 'AI', text: answer },
-        ]);
-      }).catch((err:any)=>{
-        console.log(err,"요청실패")
-      })
-
-      //   setTimeout(() => {
-      //   setMessages((prevMessages) => [
-      //     ...prevMessages,
-      //     { sender: 'AI', text: "해당질문에 대해 답변할 수 없어요" },
-      //   ]);
-      // }, 1000);
+        const answer = res.data.choices[0].message.content;
+  
+        // "부물 AI가 답변을 준비중입니다..." 메시지를 대체
+        setMessages((prevMessages) => {
+          const updatedMessages = [...prevMessages];
+          updatedMessages.pop(); // 마지막 메시지("부물 AI가 답변을 준비중입니다...") 제거
+          return [...updatedMessages, { sender: '부물AI', text: answer }];
+        });
+  
+        // Supabase 대화 저장
+        createBmchat(inputValue, answer);
+      } catch (err) {
+        console.log(err, "요청실패");
+  
+        // 오류가 발생한 경우 "부물 AI가 답변을 준비중입니다..." 메시지를 대체
+        setMessages((prevMessages) => {
+          const updatedMessages = [...prevMessages];
+          updatedMessages.pop(); // 마지막 메시지("부물 AI가 답변을 준비중입니다...") 제거
+          return [...updatedMessages, { sender: '부물AI', text: "답변을 가져오는 데 실패했습니다. 다시 시도해 주세요." }];
+        });
+      }
     }
   };
   
 
-  
-  
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
-    useEffect(()=>{
-        // getTodos()
-        // getTodosById(200)//
-        // getTodosBySearch("stu")//
-        // createTodos("next.jsd에서 수파베이스 쓰는 재미")// ps. dev환경에서는 두번 발동된다 useEffect가
-        // updateTodos(4,"todo를 업데이트")
-        // deleteTodosSoft(4);
-        // deleteTodosHard(4);
-        // createBmchat("부동산 질문해볼게","! 말씀만해주세요")
-        console.log(">>>>질문답변 저장 잘되니")
-    },[])
+  // useEffect(() => {
+  //   console.log(">>>>질문답변 저장 잘되니");
+  // }, []);
 
-    return (
-      <div className="">
-        {/* <button
-          className="fixed bottom-4 right-4 inline-flex items-center justify-center text-sm font-medium disabled:pointer-events-none disabled:opacity-50 border rounded-full w-16 h-16 bg-black hover:bg-gray-700 m-0 cursor-pointer border-gray-200 bg-none p-0 normal-case leading-5 hover:text-gray-900"
-          type="button" aria-haspopup="dialog" aria-expanded="false" data-state="closed">
-          <svg xmlns="http://www.w3.org/2000/svg" width="30" height="40" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-            className="text-white block border-gray-200 align-middle">
-            <path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z" className="border-gray-200">
-            </path>
-          </svg>
-        </button> */}
-  
-        <div style={{ boxShadow: '0 0 #0000, 0 0 #0000, 0 1px 2px 0 rgb(0 0 0 / 0.05)' }}
-          className="fixed bottom-[calc(4rem+1.5rem)] right-0 mr-4 bg-white p-6 rounded-lg border border-[#e5e7eb] w-[440px] h-[634px]">
-  
-          {/* Heading */}
-          <div className="flex flex-col space-y-1.5 pb-6">
-            <h2 className="font-semibold text-lg tracking-tight">부물AI 챗봇</h2>
-            <p className="text-sm text-[#6b7280] leading-3">PAMI AI</p>
-          </div>
-  
-          {/* Chat Container */}
-          {/* pr-4 h-[474px] overflow-y-auto */}
-          {/* <div className="pr-4 h-[474px]" style={{ minWidth: '100%', display: 'table' }}> */}
-          {/* <div className="overflow-y-auto pr-4 h-[474px]" style={{ minWidth: '100%', display: 'table' }}>
-            {messages.map((msg, index) => (
-              <div key={index} className="flex gap-3 my-4 text-gray-600 text-sm flex-1">
-                <span className="relative flex shrink-0 overflow-hidden rounded-full w-8 h-8">
-                  <div className="rounded-full bg-gray-100 border p-1">
-                    <svg stroke="none" fill="black" strokeWidth="1.5" viewBox="0 0 24 24" aria-hidden="true" height="20" width="20" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"></path>
-                    </svg>
-                  </div>
-                </span>
-                <p className="leading-relaxed">
-                  <span className="block font-bold text-gray-700">{msg.sender} </span>{msg.text}
-                </p>
-              </div>
-            ))}
-          </div> */}
-          <div className="overflow-y-auto pr-4 h-[474px]" style={{ minWidth: '100%', display: 'block' }}>
-  {messages.map((msg, index) => (
-    <div key={index} className="flex gap-3 my-4 text-gray-600 text-sm flex-1">
-      <span className="relative flex shrink-0 overflow-hidden rounded-full w-8 h-8">
-        <div className="rounded-full bg-gray-100 border p-1">
-          <svg stroke="none" fill="black" strokeWidth="1.5" viewBox="0 0 24 24" aria-hidden="true" height="20" width="20" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"></path>
-          </svg>
+  return (
+    <div className="flex justify-center items-center h-screen bg-gray-100"> {/* 전체 화면 중앙에 정렬 */}
+      <div style={{ boxShadow: '0 0 #0000, 0 0 #0000, 0 1px 2px 0 rgb(0 0 0 / 0.05)' }}
+        className=" bg-white p-6 m-3 rounded-lg border border-[#e5e7eb] w-full max-w-[440px] h-[634px]">
+          {/* fixed bottom-[calc(4rem+1.5rem)] right-0 mr-4 */}
+        {/* Heading */}
+        <div className="flex flex-col space-y-1.5 pb-6">
+          <h2 className="font-semibold text-lg tracking-tight">부물AI 챗봇</h2>
+          <p className="text-sm text-[#6b7280] leading-3">PAMI AI</p>
         </div>
-      </span>
-      <p className="leading-relaxed">
-        <span className="block font-bold text-gray-700">{msg.sender} </span>{msg.text}
-      </p>
-    </div>
-  ))}
-</div>
 
-  
-          {/* Input box */}
-          <div className="flex items-center pt-0">
-            <form className="flex items-center justify-center w-full space-x-2" onSubmit={handleSendMessage}>
-              <input
-                className="flex h-10 w-full rounded-md border border-[#e5e7eb] px-3 py-2 text-sm placeholder-[#6b7280] focus:outline-none focus:ring-2 focus:ring-[#9ca3af] disabled:cursor-not-allowed disabled:opacity-50 text-[#030712] focus-visible:ring-offset-2"
-                placeholder="질문을 입력해주세요"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-              />
-              <button
-                className="inline-flex items-center justify-center rounded-md text-sm font-medium text-[#f9fafb] disabled:pointer-events-none disabled:opacity-50 bg-black hover:bg-[#111827E6] h-10 px-4 py-2"
-                type="submit"
-              >
-                Send
-              </button>
-            </form>
-          </div>
+        {/* Chat Container */}
+        <div className="overflow-y-auto pr-4 h-[474px] w-full">
+          {messages.map((msg, index) => (
+            <div key={index} className="flex gap-3 my-4 text-gray-600 text-sm flex-1">
+              <span className="relative flex shrink-0 overflow-hidden rounded-full w-8 h-8">
+                <div className="rounded-full bg-gray-100 border p-1">
+                  <svg stroke="none" fill="black" strokeWidth="1.5" viewBox="0 0 24 24" aria-hidden="true" height="20" width="20" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"></path>
+                  </svg>
+                </div>
+              </span>
+              <p className="leading-relaxed">
+                <span className="block font-bold text-gray-700">{msg.sender} </span>{msg.text}
+              </p>
+            </div>
+          ))}
+          <div ref={messagesEndRef} />
+          {/* <Loading></Loading> */}
+        </div>
+
+        {/* Input box */}
+        <div className="flex items-center pt-0 w-full">
+          <form className="flex items-center justify-center w-full space-x-2" onSubmit={handleSendMessage}>
+            <input
+              className="flex h-10 w-full rounded-md border border-[#e5e7eb] px-3 py-2 text-sm placeholder-[#6b7280] focus:outline-none focus:ring-2 focus:ring-[#9ca3af] disabled:cursor-not-allowed disabled:opacity-50 text-[#030712] focus-visible:ring-offset-2"
+              placeholder="질문을 입력해주세요"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+            />
+            <button
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium text-[#f9fafb] disabled:pointer-events-none disabled:opacity-50 bg-black hover:bg-[#111827E6] h-10 px-4 py-2"
+              type="submit"
+            >
+              Send
+            </button>
+          </form>
         </div>
       </div>
-    );
+    </div>
+  );
 }
 
-export default BmchatContainer
+export default BmchatContainer;

@@ -2,40 +2,71 @@
 import { createBmchat, deleteBmchat, getBmchat, getBmchatSearch, updateBmchat } from "@/apis/bm_chat";
 import React, { useEffect, useState, useRef } from 'react';
 import axios from "axios";
+import Loading from "../loading";
 
 const BmchatContainer = () => {
   const [messages, setMessages] = useState([
     { sender: '부물AI', text: '부동산과 관련된 질문을 물어봐 주세요' },
   ]);
   const [inputValue, setInputValue] = useState('');
+  const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleSendMessage = (e:any) => {
+  const handleSendMessage = async (e:any) => {
     e.preventDefault();
     if (inputValue.trim()) {
-      setMessages([...messages, { sender: '질문자', text: inputValue }]);
+      // 사용자의 메시지를 추가
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { sender: '질문자', text: inputValue },
+      ]);
+      
+      // "부물 AI가 답변을 준비중입니다..." 메시지 추가
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { sender: '부물AI', text: "AI가 답변을 준비중입니다..." },
+      ]);
+
+      // 입력 필드 비우기
       setInputValue('');
-      let answer = "";
-      axios.post('/api/generate', {
-        prompt: inputValue
-      })
-      .then((res) => {
+
+      // 로딩 상태 시작
+      setLoading(true);
+
+      try {
+        const res = await axios.post('/api/generate', {
+          prompt: inputValue
+        });
         console.log(res, '========모델컬요청테스트성공=======');
         console.log(res.data.choices[0].message.content);
-        answer = res.data.choices[0].message.content;
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          { sender: 'AI', text: answer },
-        ]);
-        // Supabase 대화저장
-        createBmchat(inputValue,answer);
-      }).catch((err) => {
+        const answer = res.data.choices[0].message.content;
+
+        // "부물 AI가 답변을 준비중입니다..." 메시지를 대체
+        setMessages((prevMessages) => {
+          const updatedMessages = [...prevMessages];
+          updatedMessages.pop(); // 마지막 메시지("부물 AI가 답변을 준비중입니다...") 제거
+          return [...updatedMessages, { sender: '부물AI', text: answer }];
+        });
+
+        // Supabase 대화 저장
+        createBmchat(inputValue, answer);
+      } catch (err) {
         console.log(err, "요청실패");
-      });
+
+        // 오류가 발생한 경우 "부물 AI가 답변을 준비중입니다..." 메시지를 대체
+        setMessages((prevMessages) => {
+          const updatedMessages = [...prevMessages];
+          updatedMessages.pop(); // 마지막 메시지("부물 AI가 답변을 준비중입니다...") 제거
+          return [...updatedMessages, { sender: '부물AI', text: "답변을 가져오는 데 실패했습니다. 다시 시도해 주세요." }];
+        });
+      } finally {
+        // 로딩 상태 종료
+        setLoading(false);
+      }
     }
   };
 
@@ -43,15 +74,18 @@ const BmchatContainer = () => {
     scrollToBottom();
   }, [messages]);
 
-  // useEffect(() => {
-  //   console.log(">>>>질문답변 저장 잘되니");
-  // }, []);
-
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100"> {/* 전체 화면 중앙에 정렬 */}
       <div style={{ boxShadow: '0 0 #0000, 0 0 #0000, 0 1px 2px 0 rgb(0 0 0 / 0.05)' }}
-        className=" bg-white p-6 m-2 rounded-lg border border-[#e5e7eb] w-full max-w-[440px] h-[634px]">
-          {/* fixed bottom-[calc(4rem+1.5rem)] right-0 mr-4 */}
+        className=" bg-white p-6 m-3 rounded-lg border border-[#e5e7eb] w-full max-w-[440px] h-[634px]">
+
+        {/* Loading Spinner */}
+        {loading && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <Loading />
+          </div>
+        )}
+
         {/* Heading */}
         <div className="flex flex-col space-y-1.5 pb-6">
           <h2 className="font-semibold text-lg tracking-tight">부물AI 챗봇</h2>
@@ -85,10 +119,12 @@ const BmchatContainer = () => {
               placeholder="질문을 입력해주세요"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
+              disabled={loading} // 로딩 중일 때 비활성화
             />
             <button
               className="inline-flex items-center justify-center rounded-md text-sm font-medium text-[#f9fafb] disabled:pointer-events-none disabled:opacity-50 bg-black hover:bg-[#111827E6] h-10 px-4 py-2"
               type="submit"
+              disabled={loading} // 로딩 중일 때 비활성화
             >
               Send
             </button>
