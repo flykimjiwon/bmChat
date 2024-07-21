@@ -28,7 +28,7 @@ const BmchatContainer = () => {
       // "부물 AI가 답변을 준비중입니다..." 메시지 추가
       setMessages((prevMessages) => [
         ...prevMessages,
-        { sender: '부물AI', text: "AI가 답변을 준비중입니다..." },
+        { sender: '부물AI', text: "부물AI가 답변을 준비중입니다..." },
       ]);
 
       // 입력 필드 비우기
