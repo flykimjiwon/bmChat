@@ -26,7 +26,7 @@ const useBmchatController = () =>{
 
     // 비어있는 todo 생성
     const onCreateEmptyTodos = async()=>{
-        await createBmchat("");
+        // await createBmchat();
         await onGetTodos();
     }
     // todo 업데이트
