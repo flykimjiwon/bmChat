@@ -4,7 +4,17 @@
 
 /* globals.css */
 
+/* 모바일 인풋태그 확대방지 */
 input, textarea, select, button {
     font-size: 16px;
   }
   
+/* 모바일 반응형 상단 붙이기 */
+/* @layer base {
+    @media (max-height: 1000px) {
+      .mobile-height-adjust {
+        margin-top: 10px;
+      }
+    }
+  }
+   */
