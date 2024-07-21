@@ -78,7 +78,7 @@ const BmchatContainer = () => {
     // flex justify-center : 좌우중간 items-center : 상하중간
     <div className="flex justify-center h-screen bg-gray-100"> {/* 전체 화면 중앙에 정렬 */}
       <div style={{ boxShadow: '0 0 #0000, 0 0 #0000, 0 1px 2px 0 rgb(0 0 0 / 0.05)' }}
-        className=" bg-white p-6 m-3 rounded-lg border border-[#e5e7eb] w-full max-w-[440px] h-[634px]">
+        className=" bg-white p-6 m-3 rounded-lg border border-[#e5e7eb] w-full max-w-[440px]  h-full max-h-[634px]">
 
         {/* Loading Spinner */}
         {loading && (
