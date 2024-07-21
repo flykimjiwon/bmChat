@@ -38,12 +38,13 @@ const BmchatContainer = () => {
       setLoading(true);
 
       try {
-        const res = await axios.post('/api/generate', {
+        const res = await axios.post('/api/generatebm', {
           prompt: inputValue
         });
         console.log(res, '========모델컬요청테스트성공=======');
-        console.log(res.data.choices[0].message.content);
-        const answer = res.data.choices[0].message.content;
+        // console.log(res.data.choices[0].message.content);
+        // const answer = res.data.choices[0].message.content; // GPT
+        const answer = res.data.response; //부물
 
         // "부물 AI가 답변을 준비중입니다..." 메시지를 대체
         setMessages((prevMessages) => {
