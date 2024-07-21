@@ -115,7 +115,7 @@ const BmchatContainer = () => {
         <div className="flex items-center pt-0 w-full">
           <form className="flex items-center justify-center w-full space-x-2" onSubmit={handleSendMessage}>
             <input
-              className="flex h-10 w-full rounded-md border border-[#e5e7eb] px-3 py-2 text-sm placeholder-[#6b7280] focus:outline-none focus:ring-2 focus:ring-[#9ca3af] disabled:cursor-not-allowed disabled:opacity-50 text-[#030712] focus-visible:ring-offset-2"
+              className="flex h-10 w-full rounded-md border border-[#e5e7eb] px-3 py-2 text-base placeholder-[#6b7280] focus:outline-none focus:ring-2 focus:ring-[#9ca3af] disabled:cursor-not-allowed disabled:opacity-50 text-[#030712] focus-visible:ring-offset-2"
               placeholder="질문을 입력해주세요"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
