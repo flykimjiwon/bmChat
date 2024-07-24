@@ -27,6 +27,7 @@ const BmchatContainer = () => {
   const [loading, setLoading] = useState(false);
 
   const [isFirstQuestion, setIsFirstQuestion] = useState(true);
+  const [showRecommendedQuestions, setShowRecommendedQuestions] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // const recommendedQuestions = [
@@ -279,7 +280,7 @@ const BmchatContainer = () => {
                 {recommendedQuestions.map((question, index) => (//text-[#6b7280] 
                   <p key={index} className="text-[#6b7280] cursor-pointer hover:underline"
                     onClick={() => setInputValue(question)}>
-                    {question}
+                    {"- "}{question}
                   </p>
                 ))}
               </ul>
