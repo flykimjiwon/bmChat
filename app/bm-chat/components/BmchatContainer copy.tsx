@@ -12,33 +12,53 @@ const BmchatContainer = () => {
 
 
   const [messages, setMessages] = useState([
-    { sender: '부물AI', text: '😁 부동산과 관련된 질문에 특화된 AI 챗봇 부물이에요!' },
+    { sender: '부물AI', text: '부동산과 관련된 질문에 특화된 AI 챗봇 부물이에요!' },
+    { sender: '부물AI', text: '부동산과 관련된 질문을 물어봐 주세요 😁' }
   ]);
 
-  useEffect(()=>{
-    setTimeout(()=>{
-      let arr = [...messages]
-      arr.push({ sender: '부물AI', text: '부동산과 관련된 질문을 물어봐 주세요' })
-      setMessages(arr)
-    },1000)
-  },[])
+  // useEffect(()=>{
+  //   setTimeout(()=>{
+  //     let arr = [...messages]
+  //     arr.push({ sender: '부물AI', text: '부동산과 관련된 질문을 물어봐 주세요 😁' })
+  //     setMessages(arr)
+  //   },500)
+  // },[])
   const [inputValue, setInputValue] = useState('');
   const [loading, setLoading] = useState(false);
 
   const [isFirstQuestion, setIsFirstQuestion] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const recommendedQuestions = [
+  // const recommendedQuestions = [
+  //   "현재 부동산 시장 동향은 어떨까요?",
+  //   "부동산 투자에 좋은 지역은 어디인가요?",
+  //   "부동산 세금 관련 정보를 알고 싶어요.",
+  //   "녹번 힐스테이트 실거래가",
+  //   "서울 집값 어떻게될거같니",
+  // ];
+  const allRecommendedQuestions = [
     "현재 부동산 시장 동향은 어떨까요?",
     "부동산 투자에 좋은 지역은 어디인가요?",
     "부동산 세금 관련 정보를 알고 싶어요.",
+    "녹번 힐스테이트 최근 실거래가 알려줘",
+    "서울 집값 어떻게 될거 같아?",
   ];
+
+  const [recommendedQuestions, setRecommendedQuestions] = useState<string[]>([]);
+
+  useEffect(() => {
+    const randomQuestions = allRecommendedQuestions
+      .sort(() => 0.5 - Math.random())
+      .slice(0, 3);
+    setRecommendedQuestions(randomQuestions);
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const handleSendMessage = async (e:any) => {
+    if(!inputValue) return;
     e.preventDefault();
     if(isFirstQuestion){
       // 첫질문 시작된경우 대화내역 초기화
@@ -208,16 +228,34 @@ const BmchatContainer = () => {
               </p>
             </div>
           ))}
+          {/* <hr></hr>
+          {
+            recommendedQuestions.map((msg,index)=>(
+              <div key={index} className="flex gap-3 my-4 text-gray-600 text-sm flex-1">
+              <span className="relative flex shrink-0 overflow-hidden rounded-full w-8 h-8">
+              <div className="rounded-full bg-gray-100 border p-1">
+              {
+                <TbUser size={20} aria-hidden="true"></TbUser>
+              }
+            </div>
+              </span>
+              <p className="leading-relaxed">
+                <span className="block font-bold text-gray-700">{"질문자"} </span>{msg}
+              </p>
+            </div>
+            ))
+          }
+          <hr></hr> */}
           <div ref={messagesEndRef} />
         </div>
 
-             {/* Recommended Questions */}
-        {isFirstQuestion && (
-          <div className="fixed top-60 w-full max-w-[385px] px-6">
+{/* Recommended Questions */}
+{isFirstQuestion && (
+          <div className="fixed top-[460px] w-full max-w-[320px] px-2">
             <div className="bg-neutral-50 rounded-lg shadow-md">
-              {/* <h3 className="font-semibold text-base">부물 추천질문</h3> */}
+              {/* <p className="font-semibold text-base px-3">→추천질문</p> */}
               <ul className="list-disc pl-5 space-y-1">
-                {recommendedQuestions.map((question, index) => (
+                {recommendedQuestions.map((question, index) => (//text-[#6b7280] 
                   <p key={index} className="text-[#6b7280] cursor-pointer hover:underline"
                     onClick={() => setInputValue(question)}>
                     {question}
@@ -227,6 +265,7 @@ const BmchatContainer = () => {
             </div>
           </div>
         )}
+
 
 
         {/* Input box */}
@@ -242,7 +281,8 @@ const BmchatContainer = () => {
             <button
               className="inline-flex items-center justify-center rounded-md text-sm font-medium text-[#f9fafb] disabled:pointer-events-none disabled:opacity-50 bg-black hover:bg-[#111827E6] h-10 px-4 py-2"
               type="submit"
-              disabled={loading} // 로딩 중일 때 비활성화
+              disabled={loading || !inputValue} // 로딩 중일 때 비활성화
+              // input에 값 없을떄도 disabled
             >
               Send
             </button>

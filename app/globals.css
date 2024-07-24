@@ -18,3 +18,20 @@ input, textarea, select, button {
     }
   }
    */
+
+   .swipeable-container {
+    overflow-x: auto;
+    white-space: nowrap;
+    padding: 0 0.5rem; /* 좌우 패딩 */
+  }
+  
+  .swipeable-content {
+    display: flex;
+    flex-direction: row;
+  }
+  
+  .swipeable-item {
+    display: inline-block;
+    margin-right: 1rem; /* 항목 사이의 간격 */
+  }
+  
