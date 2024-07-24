@@ -251,7 +251,7 @@ const BmchatContainer = () => {
 
 {/* Recommended Questions */}
 {isFirstQuestion && (
-          <div className="fixed top-64 w-full max-w-[355px] px-2">
+          <div className="fixed top-[460px] w-full max-w-[320px] px-2">
             <div className="bg-neutral-50 rounded-lg shadow-md">
               {/* <p className="font-semibold text-base px-3">→추천질문</p> */}
               <ul className="list-disc pl-5 space-y-1">
@@ -281,7 +281,8 @@ const BmchatContainer = () => {
             <button
               className="inline-flex items-center justify-center rounded-md text-sm font-medium text-[#f9fafb] disabled:pointer-events-none disabled:opacity-50 bg-black hover:bg-[#111827E6] h-10 px-4 py-2"
               type="submit"
-              disabled={loading} // 로딩 중일 때 비활성화
+              disabled={loading || !inputValue} // 로딩 중일 때 비활성화
+              // input에 값 없을떄도 disabled
             >
               Send
             </button>
