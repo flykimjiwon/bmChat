@@ -251,7 +251,7 @@ const BmchatContainer = () => {
 
 {/* Recommended Questions */}
 {isFirstQuestion && (
-          <div className="fixed top-60 w-full max-w-[355px] px-6">
+          <div className="fixed top-64 w-full max-w-[355px] px-2">
             <div className="bg-neutral-50 rounded-lg shadow-md">
               {/* <p className="font-semibold text-base px-3">→추천질문</p> */}
               <ul className="list-disc pl-5 space-y-1">
