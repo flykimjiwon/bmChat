@@ -125,31 +125,11 @@ const BmchatContainer = () => {
         createBmchat(inputValue, answer);
       } catch (err) {
         console.log(err, "요청실패");
-      
-        try {
-          // 다른 API 호출
-          const res = await axios.post('/api/generate', {
-            prompt: inputValue
-          });
-          console.log(res, '========fallback API 요청 성공 GPT사용=======');
-          const answer = res.data.choices[0].message.content;
-      
-          setMessages((prevMessages) => {
-            const updatedMessages = [...prevMessages];
-            updatedMessages.pop();
-            return [...updatedMessages, { sender: '부물AI', text: answer }];
-          });
-      
-          createBmchat(inputValue, answer);
-        } catch (fallbackErr) {
-          console.log(fallbackErr, "fallback API 요청 실패");
-      
-          setMessages((prevMessages) => {
-            const updatedMessages = [...prevMessages];
-            updatedMessages.pop();
-            return [...updatedMessages, { sender: '부물AI', text: "답변을 가져오는 데 실패했습니다. 다시 시도해 주세요." }];
-          });
-        } 
+        setMessages((prevMessages) => {
+          const updatedMessages = [...prevMessages];
+          updatedMessages.pop();
+          return [...updatedMessages, { sender: '부물AI', text: "답변을 가져오는 데 실패했습니다. 다시 시도해 주세요." }];
+        });
       }finally {
         setLoading(false);
       }
