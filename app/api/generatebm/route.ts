@@ -14,8 +14,8 @@ export async function POST(request: Request): Promise<NextResponse> {
       const response = await fetch(url, options);
 
       if (!response.ok) {
-        if (response.status === 503 && retries > 0) {
-          // 503 오류일 경우 재시도
+        if ((response.status === 503 || response.status === 504) && retries > 0) {
+          // 503,504 오류일 경우 재시도
           console.log(`503 오류 발생. 재시도 중... 남은 횟수: ${retries}`);
           await new Promise(resolve => setTimeout(resolve, retryDelay)); // 지연 후 재시도
           return fetchWithRetries(url, options, retries - 1);
