@@ -81,28 +81,28 @@ const BmchatContainer = () => {
       setIsFirstQuestion(false);
       setLoading(true);
       try {
-        // 외부 API URL로 직접 요청을 보냅니다.
-        const res = await axios.post('http://43.201.248.119:2333/generate', {
-          text: inputValue
-        }, {
-          headers: {
-            'Content-Type': 'application/json'
-            // 'Authorization': `Bearer ${YOUR_API_KEY}`, // 필요한 경우 Authorization 헤더 추가
-          }
+        const res = await axios.post('/api/generatebm', {
+          prompt: inputValue
         });
-    
-        console.log(res, '========모델 요청 성공=======');
+        console.log(res, '========모델컬요청테스트성공=======');
         const answer = res.data.response;
-    
+      
         setMessages((prevMessages) => {
           const updatedMessages = [...prevMessages];
           updatedMessages.pop();
           return [...updatedMessages, { sender: '부물AI', text: answer }];
         });
-    
+      
         createBmchat(inputValue, answer);
+
+        // 요청과 응답 로그 업데이트
+        setRequestResponseLogs((prevLogs) => [
+          ...prevLogs,
+          { request: inputValue, response: res }
+        ]);
+
       } catch (err) {
-        console.log(err, "요청 실패");
+        console.log(err, "요청실패");
         setMessages((prevMessages) => {
           const updatedMessages = [...prevMessages];
           updatedMessages.pop();
