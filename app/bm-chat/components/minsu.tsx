@@ -17,7 +17,7 @@ const BmchatContainer = () => {
   const [showRecommendedQuestions, setShowRecommendedQuestions] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [requestResponseLogs, setRequestResponseLogs] = useState<any[]>([]);
-
+// 
   const allRecommendedQuestions = [
     "현재 부동산 시장 동향은 어떨까요?",
     "부동산 투자에 좋은 지역은 어디인가요?",
